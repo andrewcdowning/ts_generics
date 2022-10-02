@@ -1,21 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import people from './mock-data/people';
 import widgets from './mock-data/widgets';
 
 import './App.css';
+import genericSearch from './utils/genericSearch';
+import { SearchInput } from './components/SearchInput';
 
 function App() {
+  const [query, setQuery] = useState<string>("")
   return (
    <div>
+    <SearchInput setSearchQuery={setQuery}/>
     <h2>Widgets:</h2>
-    {widgets.map(widget => {
+    {widgets.filter((widget) => genericSearch(widget, ['title', "description"], query, false)).map(widget => {
       return (
         <h3>{widget.title}</h3>
       )
     })}
 
     <h2>People:</h2>
-    {people.map(person => {
+    {people.filter((person) => genericSearch(person, ['firstName', "lastName", "eyeColor"], query, false)).map(person => {
       return (
         <h3>{person.firstName} {person.lastName}</h3>
       )
