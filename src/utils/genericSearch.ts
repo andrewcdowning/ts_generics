@@ -5,7 +5,7 @@ export default function genericSearch<T>(
   shouldBeCaseSensitive: boolean
 ): boolean {
 
-  if (query == "") {
+  if (query === "") {
     return true;
   }
 
