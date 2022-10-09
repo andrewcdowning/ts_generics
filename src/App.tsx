@@ -7,34 +7,35 @@ import genericSearch from "./utils/genericSearch";
 import { SearchInput } from "./components/SearchInput";
 import genericSort from "./utils/genericSort";
 import IWidget from "./interfaces/IWidget";
-import IProperty from "./interfaces/IProperty";
+import ISorter from "./interfaces/ISorters";
 import IPerson from "./interfaces/IPerson";
 import { Sorters } from "./components/Sorters";
 import { WidgetRender } from "./components/renderers/WidgetRender";
 import { PeopleRender } from "./components/renderers/PeopleRender";
 import genericFilter from "./utils/genericFilter";
 import { Filters } from "./components/Filters";
+import IFilter from "./interfaces/IFilter";
 
 function App() {
   const [query, setQuery] = useState<string>("");
   const [showPeople, setShowPeople] = useState<boolean>(false);
   const [widgetSortproperty, setWidgetSortProperty] = useState<
-    IProperty<IWidget>
+    ISorter<IWidget>
   >({
     property: "title",
     isDescending: true,
   });
   const [widgetFilterProperties, setWidgetFilterProperties] = useState<
-    Array<keyof IWidget>
+    Array<IFilter<IWidget>>
   >([]);
   const [peopleSortproperty, setPeopleSortProperty] = useState<
-    IProperty<IPerson>
+    ISorter<IPerson>
   >({
     property: "firstName",
     isDescending: true,
   });
   const [peopleFilterProperties, setPeopleFilterProperties] = useState<
-    Array<keyof IPerson>
+    Array<IFilter<IPerson>>
   >([]);
   const buttonText = showPeople ? "Show Widgets" : "Show People";
   return (
@@ -62,17 +63,36 @@ function App() {
             object={widgets[0]}
             properties={widgetFilterProperties}
             onChangeFilter={(property) => {
-              widgetFilterProperties.includes(property)
-                ? setWidgetFilterProperties(
-                    widgetFilterProperties.filter(
-                      (widgetFilterProperty) =>
-                        widgetFilterProperty !== property
-                    )
+              const propertyMatched = widgetFilterProperties.some(
+                (widgetFilterProperty) =>
+                  widgetFilterProperty.property === property.property
+              );
+              const fullMatch = widgetFilterProperties.some(
+                (widgetFilterProperty) =>
+                  widgetFilterProperty.property === property.property &&
+                  widgetFilterProperty.isTruthySelected === property.isTruthySelected
+              );
+              if (fullMatch){
+                setWidgetFilterProperties(
+                  widgetFilterProperties.filter(
+                    (widgetFilterProperty) =>
+                      widgetFilterProperty.property !== property.property
                   )
-                : setWidgetFilterProperties([
-                    ...widgetFilterProperties,
-                    property,
-                  ]);
+                )
+              } else if (propertyMatched) {
+                setWidgetFilterProperties([
+                  ...widgetFilterProperties.filter(
+                    (widgetFilterProperty) =>
+                      widgetFilterProperty.property !== property.property
+                  ),
+                  property
+                  ])
+              } else {
+                setWidgetFilterProperties([
+                  ...widgetFilterProperties,
+                  property,
+                ]);
+              } 
             }}
           />
           {widgets
@@ -95,7 +115,7 @@ function App() {
             }}
             object={people[0]}
           />
-          <br/>
+          <br />
           <Filters
             object={people[0]}
             properties={peopleFilterProperties}
@@ -103,8 +123,7 @@ function App() {
               peopleFilterProperties.includes(person)
                 ? setPeopleFilterProperties(
                     peopleFilterProperties.filter(
-                      (peopleFilterProperty) =>
-                      peopleFilterProperty !== person
+                      (peopleFilterProperty) => peopleFilterProperty !== person
                     )
                   )
                 : setPeopleFilterProperties([

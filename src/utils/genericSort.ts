@@ -1,4 +1,4 @@
-import IProperty from "../interfaces/IProperty";
+import IProperty from "../interfaces/ISorters";
 
 export default function genericSort<T>(
   a: T,
