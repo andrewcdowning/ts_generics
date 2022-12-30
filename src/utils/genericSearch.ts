@@ -5,12 +5,13 @@ export default function genericSearch<T>(
   shouldBeCaseSensitive: boolean
 ): boolean {
 
-  if (query === "") {
-    return true;
-  }
+    if (query === "") {
+        return true;
+    }
 
   return properties.some((property) => {
     const value = object[property];
+
     if (typeof value === "string" || typeof value === "number") {
         if (shouldBeCaseSensitive) {
             return value.toString().includes(query);
@@ -18,6 +19,7 @@ export default function genericSearch<T>(
             return value.toString().toLowerCase().includes(query.toLowerCase());
         }
     }
+
     return false;
   });
 }

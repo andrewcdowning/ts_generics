@@ -1,21 +1,29 @@
-import React, { useEffect, useState } from "react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 import useDebounce from "../hooks/useDebounce";
+import genericSearch from "../utils/genericSearch";
+import PropsWithChildrenFunction from "../types/PropsWithChildrenFunction";
 
-export interface ISearchInputProps {
-  setSearchQuery: (searchQuery: string) => void;
+export interface ISearchInputProps<T> {
+  dataSource: Array<T>;
+  searchKeys: Array<keyof T>;
 }
 
-export function SearchInput(props: ISearchInputProps) {
-  const { setSearchQuery } = props;
-  const [query, setQuery] = useState<string>('');
-  const debouncedQuery = useDebounce(query, 150)
+export function SearchInput<T>(
+  props: PropsWithChildrenFunction<ISearchInputProps<T>, T>
+) {
+  const { searchKeys, dataSource, children } = props;
+  const [query, setQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const debouncedQuery = useDebounce(query, 250);
 
   useEffect(() => {
-    setSearchQuery(debouncedQuery)
-  }, [debouncedQuery, setSearchQuery]) 
+    setSearchQuery(debouncedQuery);
+  }, [debouncedQuery, setSearchQuery]);
+
   return (
-    <div>
-      <label htmlFor="Search" className="mt-3">
+    <>
+      <label htmlFor="search" className="mt-3">
         Search! Try me!
       </label>
       <input
@@ -25,10 +33,15 @@ export function SearchInput(props: ISearchInputProps) {
         placeholder="Search..."
         aria-label="Search"
         onChange={(event) => {
-          console.log('Firing')
           setQuery(event.target.value);
         }}
       />
-    </div>
+      {children &&
+        dataSource
+          .filter((person) =>
+            genericSearch(person, searchKeys, searchQuery, false)
+          )
+          .map((widget) => children(widget))}
+    </>
   );
 }
